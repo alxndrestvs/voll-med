@@ -30,14 +30,25 @@ public class AgendaDeConsultas {
         }
 
         var medico = escolherMedico(dados);
-        var paciente = pacienteRepository.findById(dados.idPaciente()).get();
+        var paciente = pacienteRepository.getReferenceById(dados.idPaciente());
         var consulta = new Consulta(null, medico, paciente, dados.data());
 
         consultaRepository.save(consulta);
     }
 
     private Medico escolherMedico(DadosAgendamentoConsulta dados) {
-        medicoRepository.findById(dados.idMedico()).get();
+        if (dados.idMedico() != null) {
+            return medicoRepository.getReferenceById(dados.idMedico());
+        }
+
+        if (dados.especialidade() == null) {
+            throw new ValidacaoExcpetion("Especialidade obrigatória quando um médico não for escolhiodo!");
+        }
+
+        return medicoRepository.escolherMedicoAleatorioLivreNaData(dados.especialidade(), dados.data());
+
+
+
     }
 
 }
